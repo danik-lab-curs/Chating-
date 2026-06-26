@@ -3,21 +3,324 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mini App</title>
+  <title>Курс — Mini App</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 16px; max-width: 720px; margin: 0 auto; }
-    .card { border: 1px solid #ddd; border-radius: 12px; padding: 14px; margin: 12px 0; }
-    button { padding: 10px 14px; border: 0; border-radius: 10px; background:#111; color:#fff; }
+    :root{
+      --bg:#0e1621; --card:#17212b; --text:#e6edf3; --muted:#9fb0c0;
+      --accent:#2ea6ff; --border: rgba(255,255,255,.08);
+      --good:#39d98a;
+    }
+    body{margin:0;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,Segoe UI,Arial;}
+    .topbar{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:14px 14px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);}
+    .title{font-weight:700}
+    .container{padding:14px;max-width:860px;margin:0 auto;}
+    .tabs{display:flex;gap:8px;margin:10px 0 14px;}
+    .tab{flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:transparent;color:var(--text);cursor:pointer}
+    .tab.active{border-color:rgba(46,166,255,.6);background:rgba(46,166,255,.12)}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin:10px 0}
+    .row{display:flex;gap:10px;align-items:center;justify-content:space-between}
+    .muted{color:var(--muted)}
+    .btn{padding:10px 12px;border:0;border-radius:12px;background:var(--accent);color:#07121b;font-weight:700;cursor:pointer}
+    .btn.secondary{background:rgba(255,255,255,.08);color:var(--text);border:1px solid var(--border);font-weight:600}
+    .btn.good{background:var(--good);color:#06130d}
+    .list{display:flex;flex-direction:column;gap:10px}
+    .pill{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
+    .lessonTitle{font-weight:700}
+    .progressBar{height:10px;background:rgba(255,255,255,.07);border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+    .progressFill{height:100%;background:var(--accent);width:0%}
+    textarea,input{width:100%;box-sizing:border-box;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:12px;color:var(--text);padding:10px 12px;font:inherit}
+    textarea{min-height:120px;resize:vertical}
+    .hidden{display:none}
+    .link{color:var(--accent);text-decoration:none}
   </style>
 </head>
 <body>
-  <h2>Курс — Mini App</h2>
-  <p>Это тестовая вебка для Telegram Mini App (потом расширим).</p>
-
-  <div class="card">
-    <h3>Урок 1</h3>
-    <p>Тут будет текст урока/ссылки/материалы.</p>
-    <button onclick="alert('Ок! Прогресс добавим позже')">Отметить пройден</button>
+  <div class="topbar">
+    <div>
+      <div class="title">Курс — Mini App</div>
+      <div class="muted" id="userLine">Загрузка пользователя…</div>
+    </div>
+    <button class="btn secondary" id="btnClose">Закрыть</button>
   </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" data-tab="lessons">Уроки</button>
+      <button class="tab" data-tab="homework">Домашка</button>
+      <button class="tab" data-tab="progress">Прогресс</button>
+    </div>
+
+    <!-- УРОКИ -->
+    <section id="tab-lessons">
+      <div class="card">
+        <div class="row">
+          <div>
+            <div class="lessonTitle">Модули и уроки</div>
+            <div class="muted">Открывай урок → отмечай пройденным</div>
+          </div>
+          <span class="pill" id="lessonsCountPill">0 уроков</span>
+        </div>
+      </div>
+
+      <div class="list" id="lessonsList"></div>
+
+      <div class="card hidden" id="lessonView">
+        <div class="row">
+          <div>
+            <div class="lessonTitle" id="lessonViewTitle"></div>
+            <div class="muted" id="lessonViewMeta"></div>
+          </div>
+          <button class="btn secondary" id="btnBackToList">Назад</button>
+        </div>
+        <div style="height:10px"></div>
+        <div id="lessonViewContent" class="muted"></div>
+        <div style="height:14px"></div>
+        <div class="row">
+          <button class="btn good" id="btnMarkDone">Отметить пройден</button>
+          <button class="btn secondary" id="btnOpenHomeworkTab">Сдать домашку</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ДОМАШКА -->
+    <section id="tab-homework" class="hidden">
+      <div class="card">
+        <div class="lessonTitle">Сдать домашку</div>
+        <div class="muted">Отправится в бота. Ты получишь подтверждение.</div>
+        <div style="height:12px"></div>
+
+        <label class="muted">Урок</label>
+        <select id="hwLesson" style="width:100%;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text)">
+        </select>
+
+        <div style="height:10px"></div>
+        <label class="muted">Твой ответ</label>
+        <textarea id="hwText" placeholder="Напиши ответ / вставь текст..."></textarea>
+
+        <div style="height:12px"></div>
+        <button class="btn" id="btnSendHomework">Отправить в бота</button>
+        <div style="height:10px"></div>
+        <div class="muted" id="hwStatus"></div>
+
+        <div style="height:14px"></div>
+        <div class="muted">
+          Если отправка не работает, открой бота и напиши вручную: <br/>
+          <span class="pill">/homework</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ПРОГРЕСС -->
+    <section id="tab-progress" class="hidden">
+      <div class="card">
+        <div class="row">
+          <div>
+            <div class="lessonTitle">Твой прогресс</div>
+            <div class="muted" id="progressText">0/0</div>
+          </div>
+          <span class="pill" id="progressPercent">0%</span>
+        </div>
+        <div style="height:10px"></div>
+        <div class="progressBar"><div class="progressFill" id="progressFill"></div></div>
+        <div style="height:12px"></div>
+        <button class="btn secondary" id="btnResetProgress">Сбросить прогресс</button>
+      </div>
+
+      <div class="card">
+        <div class="lessonTitle">Пройденные уроки</div>
+        <div class="muted" id="doneList">Пока ничего.</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    // ====== ДАННЫЕ УРОКОВ (пока прямо в коде) ======
+    const LESSONS = [
+      { id: "l1", title: "Урок 1 — Основы", module: "Модуль 1", content: "Тут будет текст урока/ссылки/материалы." },
+      { id: "l2", title: "Урок 2 — Практика", module: "Модуль 1", content: "Заглушка под урок 2." },
+      { id: "l3", title: "Урок 3 — Домашка", module: "Модуль 1", content: "Заглушка под урок 3." },
+    ];
+
+    // ====== ПРОГРЕСС (localStorage) ======
+    const STORAGE_KEY = "miniapp_progress_v1";
+    function loadProgress(){
+      try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch { return {}; }
+    }
+    function saveProgress(p){ localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+    function isDone(id){ return !!loadProgress()[id]; }
+    function markDone(id){
+      const p = loadProgress(); p[id] = true; saveProgress(p);
+      renderAll();
+    }
+    function resetProgress(){
+      localStorage.removeItem(STORAGE_KEY);
+      renderAll();
+    }
+
+    // ====== UI: Tabs ======
+    const tabs = document.querySelectorAll(".tab");
+    function openTab(name){
+      tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === name));
+      document.getElementById("tab-lessons").classList.toggle("hidden", name !== "lessons");
+      document.getElementById("tab-homework").classList.toggle("hidden", name !== "homework");
+      document.getElementById("tab-progress").classList.toggle("hidden", name !== "progress");
+    }
+    tabs.forEach(t => t.addEventListener("click", () => openTab(t.dataset.tab)));
+
+    // ====== UI: Lessons list + view ======
+    const lessonsList = document.getElementById("lessonsList");
+    const lessonView = document.getElementById("lessonView");
+    const btnBackToList = document.getElementById("btnBackToList");
+    const btnMarkDone = document.getElementById("btnMarkDone");
+    const btnOpenHomeworkTab = document.getElementById("btnOpenHomeworkTab");
+    let currentLessonId = null;
+
+    function openLesson(id){
+      const l = LESSONS.find(x => x.id === id);
+      currentLessonId = id;
+
+      document.getElementById("lessonViewTitle").textContent = l.title;
+      document.getElementById("lessonViewMeta").textContent = l.module;
+      document.getElementById("lessonViewContent").textContent = l.content;
+
+      lessonView.classList.remove("hidden");
+      btnMarkDone.textContent = isDone(id) ? "Уже отмечено" : "Отметить пройден";
+      btnMarkDone.disabled = isDone(id);
+    }
+
+    btnBackToList.addEventListener("click", () => {
+      lessonView.classList.add("hidden");
+      currentLessonId = null;
+    });
+
+    btnMarkDone.addEventListener("click", () => {
+      if(currentLessonId) markDone(currentLessonId);
+      btnMarkDone.textContent = "Уже отмечено";
+      btnMarkDone.disabled = true;
+    });
+
+    btnOpenHomeworkTab.addEventListener("click", () => {
+      openTab("homework");
+      if(currentLessonId){
+        document.getElementById("hwLesson").value = currentLessonId;
+      }
+    });
+
+    function renderLessons(){
+      document.getElementById("lessonsCountPill").textContent = `${LESSONS.length} уроков`;
+      lessonsList.innerHTML = "";
+      LESSONS.forEach(l => {
+        const done = isDone(l.id);
+        const el = document.createElement("div");
+        el.className = "card";
+        el.innerHTML = `
+          <div class="row">
+            <div>
+              <div class="lessonTitle">${l.title}</div>
+              <div class="muted">${l.module}</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              ${done ? `<span class="pill" style="color:#bfffe0;border-color:rgba(57,217,138,.3)">✓ пройден</span>` : `<span class="pill">не пройден</span>`}
+              <button class="btn secondary">Открыть</button>
+            </div>
+          </div>
+        `;
+        el.querySelector("button").addEventListener("click", () => openLesson(l.id));
+        lessonsList.appendChild(el);
+      });
+    }
+
+    // ====== UI: Homework send via Telegram WebApp ======
+    const hwLesson = document.getElementById("hwLesson");
+    const hwText = document.getElementById("hwText");
+    const hwStatus = document.getElementById("hwStatus");
+    document.getElementById("btnSendHomework").addEventListener("click", () => {
+      const lessonId = hwLesson.value;
+      const text = hwText.value.trim();
+      if(!text){
+        hwStatus.textContent = "Напиши текст домашки перед отправкой.";
+        return;
+      }
+
+      const lesson = LESSONS.find(x => x.id === lessonId);
+      const payload = {
+        type: "homework",
+        lessonId,
+        lessonTitle: lesson?.title || lessonId,
+        text,
+        ts: Date.now()
+      };
+
+      // Отправка в бота
+      if(window.Telegram && Telegram.WebApp){
+        Telegram.WebApp.sendData(JSON.stringify(payload));
+        hwStatus.textContent = "Отправлено в бота. Жди подтверждение.";
+        hwText.value = "";
+      } else {
+        hwStatus.textContent = "Ошибка: Telegram WebApp API не найден (открой через кнопку в боте).";
+      }
+    });
+
+    function renderHomework(){
+      hwLesson.innerHTML = LESSONS.map(l => `<option value="${l.id}">${l.title}</option>`).join("");
+    }
+
+    // ====== UI: Progress ======
+    function renderProgress(){
+      const p = loadProgress();
+      const doneIds = Object.keys(p).filter(id => p[id]);
+      const total = LESSONS.length;
+      const done = doneIds.length;
+      const percent = total ? Math.round(done/total*100) : 0;
+
+      document.getElementById("progressText").textContent = `${done}/${total} уроков`;
+      document.getElementById("progressPercent").textContent = `${percent}%`;
+      document.getElementById("progressFill").style.width = `${percent}%`;
+
+      const doneTitles = doneIds.map(id => LESSONS.find(l => l.id===id)?.title).filter(Boolean);
+      document.getElementById("doneList").textContent = doneTitles.length ? doneTitles.join(" • ") : "Пока ничего.";
+    }
+
+    document.getElementById("btnResetProgress").addEventListener("click", resetProgress);
+
+    // ====== Telegram init ======
+    function initTelegram(){
+      const closeBtn = document.getElementById("btnClose");
+      closeBtn.addEventListener("click", () => {
+        if(window.Telegram && Telegram.WebApp) Telegram.WebApp.close();
+      });
+
+      if(window.Telegram && Telegram.WebApp){
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
+
+        const u = Telegram.WebApp.initDataUnsafe?.user;
+        if(u){
+          document.getElementById("userLine").textContent =
+            `@${u.username || "user"} • id ${u.id}`;
+        } else {
+          document.getElementById("userLine").textContent = "Пользователь Telegram не распознан";
+        }
+      } else {
+        document.getElementById("userLine").textContent = "Открой через Telegram кнопку (WebApp)";
+      }
+    }
+
+    function renderAll(){
+      renderLessons();
+      renderHomework();
+      renderProgress();
+      // обновим состояние кнопки, если открыт урок
+      if(currentLessonId){
+        btnMarkDone.textContent = isDone(currentLessonId) ? "Уже отмечено" : "Отметить пройден";
+        btnMarkDone.disabled = isDone(currentLessonId);
+      }
+    }
+
+    initTelegram();
+    renderAll();
+  </script>
 </body>
 </html>
