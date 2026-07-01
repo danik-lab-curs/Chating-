@@ -52,11 +52,13 @@ body{
   margin:0;
   color:var(--text);
   font:15px/1.4 system-ui,-apple-system,Segoe UI,Arial;
+
+  /* пастельный тёмный градиент */
   background:
-    radial-gradient(900px 500px at 10% 10%, rgba(124,58,237,.35), transparent 55%),
-    radial-gradient(900px 500px at 90% 20%, rgba(34,211,238,.22), transparent 60%),
-    radial-gradient(900px 700px at 50% 100%, rgba(124,58,237,.12), transparent 55%),
-    var(--bg);
+    radial-gradient(900px 500px at 15% 10%, rgba(170, 140, 255, .10), transparent 60%),
+    radial-gradient(900px 500px at 85% 20%, rgba(120, 220, 255, .7), transparent 60%),
+    radial-gradient(900px 700px at 50% 110%, rgba(255, 190, 220, .5), transparent 55%),
+    linear-gradient(180deg, #0b1020 0%, #0a0f1a 50%, #070b14 100%);
     }
     body{margin:0;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,Segoe UI,Arial;}
     .topbar{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:14px 14px 10px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);}
@@ -229,7 +231,21 @@ body{
     content: "Открой урок в Notion по кнопке ниже.",
   },
     ];
+// ===== Bottom nav: Уроки / Домашка / Прогресс =====
+const navButtons = document.querySelectorAll(".navBtn");
 
+function openTab(name){
+  navButtons.forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+
+  document.getElementById("tab-lessons").classList.toggle("hidden", name !== "lessons");
+  document.getElementById("tab-homework").classList.toggle("hidden", name !== "homework");
+  document.getElementById("tab-progress").classList.toggle("hidden", name !== "progress");
+}
+
+navButtons.forEach(b => b.addEventListener("click", () => openTab(b.dataset.tab)));
+
+// стартовая вкладка
+openTab("lessons");
     // ====== ПРОГРЕСС (localStorage) ======
     const STORAGE_KEY = "miniapp_progress_v1";
     function loadProgress(){
