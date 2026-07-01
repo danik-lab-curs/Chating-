@@ -204,7 +204,18 @@
 
       document.getElementById("lessonViewTitle").textContent = l.title;
       document.getElementById("lessonViewMeta").textContent = l.module;
-      document.getElementById("lessonViewContent").textContent = l.content;
+      const lessonViewContent = document.getElementById("lessonViewContent");
+
+// показываем текст + кнопку на Notion (если есть notionUrl)
+lessonViewContent.innerHTML = `
+  <div class="muted">${l.content || ""}</div>
+  ${l.notionUrl ? `
+    <div style="height:12px"></div>
+    <a class="link" href="${l.notionUrl}" target="_blank" rel="noopener">
+      Открыть урок в Notion →
+    </a>
+  ` : `<div style="height:12px"></div><div class="muted">Ссылка на урок пока не задана.</div>`}
+`;
 
       lessonView.classList.remove("hidden");
       btnMarkDone.textContent = isDone(id) ? "Уже отмечено" : "Отметить пройден";
