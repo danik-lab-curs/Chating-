@@ -5,6 +5,34 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Курс — Mini App</title>
   <style>
+    .bottomNav{
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  display:flex;
+  gap:10px;
+  padding: 12px;
+  background: rgba(11,16,32,.65);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+}
+
+.navBtn{
+  flex:1;
+  padding: 12px 10px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  font-weight:800;
+  cursor:pointer;
+}
+
+.navBtn.active{
+  border-color: rgba(34,211,238,.35);
+  background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(34,211,238,.22));
+}
+
+.container{ padding-bottom: 84px; }
     :root{
   --bg:#0b1020;
   --card: rgba(255,255,255,.06);
@@ -126,7 +154,6 @@ body{
   <button class="navBtn active" data-tab="lessons">Уроки</button>
   <button class="navBtn" data-tab="homework">Домашка</button>
   <button class="navBtn" data-tab="progress">Прогресс</button>
-</div>
       </div>
     </section>
 
@@ -404,5 +431,10 @@ lessonViewContent.innerHTML = `
     initTelegram();
     renderAll();
   </script>
+  <div class="bottomNav">
+  <button class="navBtn active" data-tab="lessons">Уроки</button>
+  <button class="navBtn" data-tab="homework">Домашка</button>
+  <button class="navBtn" data-tab="progress">Прогресс</button>
+</div>
 </body>
 </html>
